@@ -297,7 +297,7 @@ def unbalanced_parentheses(s):
     return not not stack
 
 
-def miniscript_to_mermaid(miniscript, simp=True):
+def miniscript_to_mermaid(miniscript, simp=False):
     """Uses helper functions to go from miniscript to mermaid flowchart with or without simplification."""
     # Removing likeleness while we don't know how to deal with it
     miniscript = re.sub(r'\d+@', '', miniscript)
