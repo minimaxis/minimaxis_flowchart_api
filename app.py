@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 import re
 from sympy import symbols, simplify, And, Or, printing
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 
 def miniscript_to_sympy(miniscript):
@@ -237,7 +239,7 @@ def merge_or_nodes(node):
 def json_to_mermaid(json_data, parent=None, depth=0, key_counter={}, min_check=1, tot_check=1):
     """Transform miniscript in json format to mermaid flowchart"""
     key_counter = {} if key_counter is None else key_counter
-    mermaid_code = "graph TD;\n" if depth == 0 else ""
+    mermaid_code = "graph TD;" if depth == 0 else ""
     if isinstance(json_data, dict):
         for key, value in json_data.items():
             if key in key_counter:
@@ -255,8 +257,8 @@ def json_to_mermaid(json_data, parent=None, depth=0, key_counter={}, min_check=1
                 mermaid_code += json_to_mermaid(value, new_key, depth + 1, key_counter=key_counter, min_check=min_check,
                                                 tot_check=tot_check)
                 if depth:
-                    mermaid_code += f"{new_key} --> {parent};\n"
-                mermaid_code += f"{new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};\n"
+                    mermaid_code += f"{new_key} --> {parent};"
+                mermaid_code += f"{new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};"
 
             elif key == 'thresh':
                 min_check = value['num']
@@ -265,20 +267,20 @@ def json_to_mermaid(json_data, parent=None, depth=0, key_counter={}, min_check=1
                     mermaid_code += json_to_mermaid(item, new_key, depth + 1, key_counter=key_counter,
                                                     min_check=min_check, tot_check=tot_check)
                 if depth:
-                    mermaid_code += f"{new_key} --> {parent};\n"
-                mermaid_code += f"{new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};\n"
+                    mermaid_code += f"{new_key} --> {parent};"
+                mermaid_code += f"{new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};"
 
             if key in ['pk', 'older', 'after', 'hash160', 'sha256', 'hash256', 'ripemd160']:
                 if tot_check == 1:
                     pass
-                mermaid_code += f"{value[0]} -->|{key}| {parent if parent else new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};\n"
+                mermaid_code += f"{value[0]} -->|{key}| {parent if parent else new_key}{{{'Check {}/{}'.format(min_check, tot_check)}}};"
 
     elif isinstance(json_data, list):
         for item in json_data:
             mermaid_code += json_to_mermaid(item, parent, depth, key_counter=key_counter, min_check=min_check,
                                             tot_check=tot_check)
 
-    mermaid_code += f"{new_key} -->|yes|s((spend))\n{new_key} -->|no|n((nothing))" if not depth else ''
+    mermaid_code += f"{new_key} -->|yes|s((spend));{new_key} -->|no|n((nothing));" if not depth else ''
 
     return mermaid_code
 
@@ -322,3 +324,5 @@ def miniscript_to_sympy_api():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
